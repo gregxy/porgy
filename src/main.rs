@@ -1,3 +1,4 @@
+use std::error::Error;
 use std::path::PathBuf;
 use structopt::StructOpt;
 
@@ -7,15 +8,22 @@ use structopt::StructOpt;
     about = "A CLI to genrate Prost rust code from protobuf."
 )]
 struct Opt {
-    #[structopt(name = "INCLUDE_PATH", long = "include", short = "I",
-        require_delimiter(true), parse(from_os_str))]
+    #[structopt(
+        name = "INCLUDE_PATH",
+        long = "include",
+        short = "I",
+        require_delimiter(true),
+        parse(from_os_str)
+    )]
     includes: Vec<PathBuf>,
 
     #[structopt(required(true), parse(from_os_str))]
     protos: Vec<PathBuf>,
 }
 
-fn main() {
+fn main() -> Result<(), Box<dyn Error>> {
     let opt = Opt::from_args();
-    prost_build::compile_protos(&opt.protos, &opt.includes).unwrap();
+    prost_build::compile_protos(&opt.protos, &opt.includes)?;
+
+    Ok(())
 }
