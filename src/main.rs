@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::env;
 use std::error::Error;
 use std::path::PathBuf;
@@ -32,7 +33,21 @@ struct Opt {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let opt = Opt::from_args();
+    let mut opt = Opt::from_args();
+
+    let mut addl_includes: HashSet<PathBuf> = HashSet::new();
+    addl_includes.insert(PathBuf::from("."));
+    for p in opt.protos.iter() {
+        if let Some(parent) = p.parent() {
+            if parent.is_dir() {
+                addl_includes.insert(parent.to_path_buf());
+            }
+        }
+    }
+
+    for p in addl_includes.iter() {
+        opt.includes.push(p.clone());
+    }
 
     let out_dir = "OUT_DIR";
 
