@@ -7,8 +7,9 @@ use structopt::StructOpt;
     about = "A CLI to genrate Prost rust code from protobuf."
 )]
 struct Opt {
-    #[structopt(long = "include", short = "I", parse(from_os_str))]
-    includes: Option<Vec<PathBuf>>,
+    #[structopt(name = "INCLUDE_PATH", long = "include", short = "I",
+        require_delimiter(true), parse(from_os_str))]
+    includes: Vec<PathBuf>,
 
     #[structopt(required(true), parse(from_os_str))]
     protos: Vec<PathBuf>,
@@ -16,5 +17,5 @@ struct Opt {
 
 fn main() {
     let opt = Opt::from_args();
-    println!("{:?}", opt);
+    prost_build::compile_protos(&opt.protos, &opt.includes).unwrap();
 }
